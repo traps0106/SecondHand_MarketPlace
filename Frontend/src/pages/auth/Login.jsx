@@ -50,10 +50,11 @@ export default function Login() {
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label>
+                            <label htmlFor="email">
                                 Email address <span style={{ color: '#dc2626' }}>*</span>
                             </label>
                             <input
+                                id="email"
                                 type="email"
                                 className="form-input"
                                 value={email}
@@ -65,7 +66,7 @@ export default function Login() {
 
                         <div className="form-group">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                                <label style={{ margin: 0 }}>
+                                <label style={{ margin: 0 }} htmlFor="password">
                                     Password <span style={{ color: '#dc2626' }}>*</span>
                                 </label>
                                 <button
@@ -83,7 +84,9 @@ export default function Login() {
                                     {showPassword ? 'Hide' : 'Show'}
                                 </button>
                             </div>
+
                             <input
+                                id="password"
                                 type={showPassword ? 'text' : 'password'}
                                 className="form-input"
                                 value={password}
