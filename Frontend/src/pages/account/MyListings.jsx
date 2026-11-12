@@ -1,7 +1,10 @@
 
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function MyListings() {
+    const navigate = useNavigate();
+    const { state } = useLocation();
     const listings = [
         { id: 'L-201', name: 'Toyota Corolla alternator', year: '2014–2018', price: '35.000', stock: 3, status: 'Active' },
         { id: 'L-202', name: 'Honda Civic headlamp · left', year: '2016–2020', price: '22.000', stock: 2, status: 'Active' },
@@ -16,10 +19,16 @@ export default function MyListings() {
                     <p>Create and manage your secondhand car part listings.</p>
                 </div>
 
-                <button className="btn-primary" type="button">
+                <button className="btn-primary" type="button" onClick={() => navigate('/account/listings/new')}>
                     Create listing
                 </button>
             </div>
+
+            {state?.submitted && (
+                <div className="banner banner-success" role="status">
+                    ✓ Listing submitted for review. It will appear in Browse once an administrator approves it.
+                </div>
+            )}
 
             <div className="filter-toolbar">
                 <div className="filter-search">
@@ -94,6 +103,8 @@ export default function MyListings() {
                                     <button
                                         className="listing-action"
                                         type="button"
+                                        onClick={() => navigate(`/account/listings/${item.id}/edit`)}
+                                        aria-label={`Edit ${item.name}`}
                                     >
                                         Edit
                                     </button>
@@ -101,6 +112,7 @@ export default function MyListings() {
                                     <button
                                         className="listing-delete"
                                         type="button"
+                                        aria-label={`Delete ${item.name}`}
                                     >
                                         Delete
                                     </button>

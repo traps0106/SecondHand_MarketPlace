@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { signIn } from '../../auth';
 
 export default function Login() {
     const navigate = useNavigate();
+    const { state } = useLocation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +18,7 @@ export default function Login() {
         }
 
         // Navigate to account portal on successful sign in
+        signIn();
         navigate('/account/overview');
     };
 
@@ -25,7 +28,13 @@ export default function Login() {
                 <h1>Parts Market</h1>
             </header>
 
-            <div className="auth-box">
+            <main className="auth-box">
+                {state?.registered && (
+                    <div className="banner banner-success" role="status">✓ Account created. Log in with your new account.</div>
+                )}
+                {state?.deleted && (
+                    <div className="banner banner-success" role="status">✓ Your account was deleted and you were signed out.</div>
+                )}
                 <div className="card">
                     <h2 className="card-title">Sign in</h2>
                     <p className="card-subtitle">
@@ -34,6 +43,7 @@ export default function Login() {
 
                     {errorMessage && (
                         <div
+                            role="alert"
                             style={{
                                 padding: '0.75rem',
                                 marginBottom: '1rem',
@@ -112,7 +122,7 @@ export default function Login() {
                         </button>
                     </form>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

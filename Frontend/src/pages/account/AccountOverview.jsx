@@ -34,6 +34,7 @@ export default function AccountOverview() {
                             <th>Price (BHD)</th>
                             <th>Stock</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,6 +48,10 @@ export default function AccountOverview() {
                                 <td>{item.stock}</td>
                                 <td>
                                     <span className="status-badge">{item.status}</span>
+                                </td>
+                                <td>
+                                    <Link to={`/account/listings/${item.id}/edit`} className="text-link" aria-label={`Edit ${item.name}`}>Edit</Link>{' '}
+                                    <Link to="/account/listings" className="text-link" aria-label={`Delete ${item.name}`}>Delete</Link>
                                 </td>
                             </tr>
                         ))}
@@ -80,6 +85,9 @@ export default function AccountOverview() {
                         ))}
                     </tbody>
                 </table>
+                <p style={{ marginTop: '1rem' }}>
+                    <Link to="/account/order-history" className="text-link">View full order history →</Link>
+                </p>
             </div>
         </div>
     );

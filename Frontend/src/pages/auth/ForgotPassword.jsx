@@ -38,7 +38,7 @@ export default function ForgotPassword() {
                 <h1>Parts Market</h1>
             </header>
 
-            <div className="auth-box">
+            <main className="auth-box">
                 <div className="card">
                     {step === 1 && (
                         <>
@@ -102,7 +102,7 @@ export default function ForgotPassword() {
                                         background: 'none',
                                         border: 'none',
                                         fontSize: '0.75rem',
-                                        color: '#2563eb',
+                                        color: '#1d4ed8',
                                         textDecoration: 'underline',
                                         cursor: 'pointer',
                                         display: 'block',
@@ -131,7 +131,7 @@ export default function ForgotPassword() {
                             >
                                 <div className="form-group">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <label>New password</label>
+                                        <label htmlFor="new-password">New password</label>
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
@@ -141,6 +141,7 @@ export default function ForgotPassword() {
                                         </button>
                                     </div>
                                     <input
+                                        id="new-password"
                                         type={showPassword ? 'text' : 'password'}
                                         className="form-input"
                                         value={newPassword}
@@ -150,8 +151,9 @@ export default function ForgotPassword() {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Confirm new password</label>
+                                    <label htmlFor="confirm-new-password">Confirm new password</label>
                                     <input
+                                        id="confirm-new-password"
                                         type={showPassword ? 'text' : 'password'}
                                         className="form-input"
                                         value={confirmPassword}
@@ -167,7 +169,7 @@ export default function ForgotPassword() {
                         </>
                     )}
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

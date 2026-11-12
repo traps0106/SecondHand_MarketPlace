@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { signOut } from '../../auth';
 
 export default function Security() {
+    const navigate = useNavigate();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,7 +31,8 @@ export default function Security() {
 
     const handleDeleteAccount = (e) => {
         e.preventDefault();
-        alert('Account deletion request submitted.');
+        signOut();
+        navigate('/login', { state: { deleted: true } });
     };
 
     return (

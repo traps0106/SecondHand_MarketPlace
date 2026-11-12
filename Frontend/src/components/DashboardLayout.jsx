@@ -1,10 +1,12 @@
 import React from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { signOut } from '../auth';
 
 export default function DashboardLayout({ isAdmin = false }) {
     const navigate = useNavigate();
 
     const handleLogout = () => {
+        signOut();
         navigate('/login');
     };
 
@@ -14,6 +16,7 @@ export default function DashboardLayout({ isAdmin = false }) {
             <header className="app-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h1>Parts Market</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <Link to="/browse" className="public-nav-link">Browse parts</Link>
                     <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>
                         {isAdmin ? 'Admin Portal' : 'Seller Portal'}
                     </span>
