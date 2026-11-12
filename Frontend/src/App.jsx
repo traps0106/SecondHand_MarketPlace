@@ -36,7 +36,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public / Buyer Routes */}
-        <Route path="/" element={<Navigate to="/register" replace />} />
+        <Route path="/" element={<Navigate to="/browse" replace />} />
         <Route element={<PublicLayout />}>
           <Route path="/browse" element={<Browse />} />
           <Route path="/parts/:id" element={<PartDetails />} />
