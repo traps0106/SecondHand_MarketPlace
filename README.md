@@ -30,7 +30,7 @@ Optional: `npm run build` creates a production build, and `npm run preview` serv
 
 ## Exploring the prototype
 
-The app opens on **Register**. Every page is reachable by clicking links and buttons. There is no real
+The app opens on **Browse Parts** page. Every page is reachable by clicking links and buttons. There is no real
 login, so use the rules below.
 
 ### Signing in (prototype rules)
