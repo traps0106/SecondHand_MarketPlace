@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { signOut } from '../auth';
+import { Link, NavLink, Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { isAdmin as hasAdminRole, isSignedIn, signOut } from '../auth';
 
 export default function DashboardLayout({ isAdmin = false }) {
     const navigate = useNavigate();
@@ -9,6 +9,10 @@ export default function DashboardLayout({ isAdmin = false }) {
         signOut();
         navigate('/login');
     };
+
+    // Role check: signed-out users go to login, non-admins see Access denied on admin pages.
+    if (!isSignedIn()) return <Navigate to="/login" replace />;
+    if (isAdmin && !hasAdminRole()) return <Navigate to="/access-denied" replace />;
 
     return (
         <div>
@@ -76,13 +80,16 @@ export default function DashboardLayout({ isAdmin = false }) {
                             ) : (
                                 <>
                                     <NavLink to="/admin/users" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                                        User management
+                                        Overview
                                     </NavLink>
                                     <NavLink to="/admin/moderation" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                                         Listing moderation
                                     </NavLink>
                                     <NavLink to="/admin/audit-logs" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                                         Audit logs
+                                    </NavLink>
+                                    <NavLink to="/admin/security" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                                        Security
                                     </NavLink>
 
                                     {/* Sidebar Separator Line & Log Out Button */}

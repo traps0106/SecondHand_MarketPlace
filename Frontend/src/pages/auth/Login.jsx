@@ -18,8 +18,10 @@ export default function Login() {
         }
 
         // Navigate to account portal on successful sign in
-        signIn();
-        navigate('/account/overview');
+        // Prototype rule: emails starting with "admin" sign in as an administrator.
+        const isAdminUser = email.trim().toLowerCase().startsWith('admin');
+        signIn(isAdminUser ? 'admin' : 'user');
+        navigate(isAdminUser ? '/admin/users' : '/account/overview');
     };
 
     return (

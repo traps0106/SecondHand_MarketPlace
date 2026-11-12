@@ -1,17 +1,20 @@
 // Placeholder session helper for the front-end skeleton (no real auth yet).
 const KEY = 'pm-signed-in';
 
-export function isSignedIn() {
+export function getRole() {
     try {
-        return sessionStorage.getItem(KEY) === '1';
+        return sessionStorage.getItem(KEY); // 'user' | 'admin' | null
     } catch {
-        return false;
+        return null;
     }
 }
 
-export function signIn() {
+export const isSignedIn = () => getRole() !== null;
+export const isAdmin = () => getRole() === 'admin';
+
+export function signIn(role = 'user') {
     try {
-        sessionStorage.setItem(KEY, '1');
+        sessionStorage.setItem(KEY, role);
     } catch {
         /* storage unavailable */
     }

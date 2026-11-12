@@ -73,6 +73,7 @@ export default function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="moderation" element={<ListingModeration />} />
           <Route path="audit-logs" element={<AuditLogs />} />
+          <Route path="security" element={<Security />} />
           <Route path="*" element={<Navigate to="users" replace />} />
         </Route>
 
