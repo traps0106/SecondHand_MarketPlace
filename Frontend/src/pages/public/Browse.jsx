@@ -51,25 +51,16 @@ function applyFilters(parts, f) {
 }
 
 export default function Browse() {
+    // Filters apply live as you change them; the Search / Apply buttons just confirm.
     const [draft, setDraft] = useState(DEFAULT_FILTERS);
-    const [applied, setApplied] = useState(DEFAULT_FILTERS);
+    const applied = draft;
 
     const results = useMemo(() => applyFilters(PARTS, applied), [applied]);
 
     const update = (patch) => setDraft((d) => ({ ...d, ...patch }));
-    const submit = (e) => {
-        e.preventDefault();
-        setApplied(draft);
-    };
-    const clearAll = () => {
-        setDraft(EMPTY_FILTERS);
-        setApplied(EMPTY_FILTERS);
-    };
-    const removeChip = (patch) => {
-        const next = { ...applied, ...patch };
-        setDraft(next);
-        setApplied(next);
-    };
+    const submit = (e) => e.preventDefault();
+    const clearAll = () => setDraft(EMPTY_FILTERS);
+    const removeChip = (patch) => update(patch);
 
     const chips = [
         ...applied.categories.map((c) => ({ label: c, patch: { categories: applied.categories.filter((v) => v !== c) } })),

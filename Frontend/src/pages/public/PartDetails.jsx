@@ -13,7 +13,8 @@ export default function PartDetails() {
     if (!part) return <NotFound />;
 
     const max = part.stock;
-    const clamp = (n) => Math.min(Math.max(Number.isNaN(n) ? 1 : n, 1), max);
+    const outOfStock = max < 1;
+    const clamp = (n) => Math.min(Math.max(Number.isNaN(n) ? 1 : n, 1), Math.max(max, 1));
 
     const placeOrder = () => navigate('/order-confirmation', { state: { part, qty } });
 
@@ -32,7 +33,7 @@ export default function PartDetails() {
                         {yearRange(part)} · {part.make} {part.model} · Listing {part.id}
                     </p>
                     <p className="listing-meta">
-                        <span className="tag">{part.condition}</span> {part.stock} in stock
+                        <span className="tag">{part.condition}</span> {outOfStock ? 'Out of stock' : `${part.stock} in stock`}
                     </p>
                     <p className="price-large">{formatBHD(part.price)}</p>
 
@@ -44,7 +45,7 @@ export default function PartDetails() {
                                 className="btn-secondary"
                                 aria-label="Decrease quantity"
                                 onClick={() => setQty(clamp(qty - 1))}
-                                disabled={qty <= 1}
+                                disabled={outOfStock || qty <= 1}
                             >
                                 −
                             </button>
@@ -63,17 +64,17 @@ export default function PartDetails() {
                                 className="btn-secondary"
                                 aria-label="Increase quantity"
                                 onClick={() => setQty(clamp(qty + 1))}
-                                disabled={qty >= max}
+                                disabled={outOfStock || qty >= max}
                             >
                                 +
                             </button>
                         </div>
-                        <p className="listing-meta" id="quantity-hint">Maximum {max} available</p>
+                        <p className="listing-meta" id="quantity-hint">{outOfStock ? 'Currently unavailable' : `Maximum ${max} available`}</p>
                     </div>
 
                     <div className="delete-actions">
                         {isSignedIn() ? (
-                            <button type="button" className="btn-primary" onClick={placeOrder}>Place order</button>
+                            <button type="button" className="btn-primary" onClick={placeOrder} disabled={outOfStock}>Place order</button>
                         ) : (
                             <Link to="/login" className="btn-primary btn-link">Log in to order</Link>
                         )}
