@@ -25,8 +25,9 @@ export default function PersonalDetails() {
 
             <form onSubmit={handleSave}>
                 <div className="form-group">
-                    <label>Full name</label>
+                    <label htmlFor="FullName">Full name</label>
                     <input
+                        id="FullName"
                         type="text"
                         className="form-input"
                         value={fullName}
@@ -35,8 +36,9 @@ export default function PersonalDetails() {
                 </div>
 
                 <div className="form-group">
-                    <label>Display Name</label>
+                    <label htmlFor="DisplayName">Display Name</label>
                     <input
+                        id="DisplayName"
                         type="text"
                         className="form-input"
                         value={displayName}
@@ -45,8 +47,9 @@ export default function PersonalDetails() {
                 </div>
 
                 <div className="form-group">
-                    <label>Linked email</label>
+                    <label htmlFor="LinkMail">Linked email</label>
                     <input
+                        id="LinkMail"
                         type="email"
                         className="form-input"
                         value={linkedEmail}

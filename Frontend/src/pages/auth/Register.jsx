@@ -17,20 +17,20 @@ export default function Register() {
                 <h2 style={{ fontSize: '1.875rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Create account</h2>
                 <form onSubmit={(e) => e.preventDefault()}>
                     <div className="form-group">
-                        <label>Full name *</label>
-                        <input type="text" className="form-input" />
+                        <label htmlFor="Fullname">Full name *</label>
+                        <input id="Fullname" type="text" className="form-input" />
                     </div>
                     <div className="form-group">
-                        <label>Email address *</label>
-                        <input type="email" className="form-input" />
+                        <label htmlFor="Email">Email address *</label>
+                        <input id="Email" type="email" className="form-input" />
                     </div>
                     <div className="form-group">
-                        <label>Password *</label>
-                        <input type="password" className="form-input" defaultValue="••••••••••••" />
+                        <label htmlFor="Password">Password *</label>
+                        <input id="Password" type="password" className="form-input" defaultValue="••••••••••••" />
                     </div>
                     <div className="form-group">
-                        <label>Confirm password *</label>
-                        <input type="password" className="form-input" defaultValue="••••••••••••" />
+                        <label htmlFor="ConfirmPass">Confirm password *</label>
+                        <input id="ConfirmPass" type="password" className="form-input" defaultValue="••••••••••••" />
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <div className="form-group" style={{ flex: 1 }}>

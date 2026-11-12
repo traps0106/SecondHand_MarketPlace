@@ -40,7 +40,7 @@ export default function Security() {
                 <form onSubmit={handlePasswordUpdate}>
                     <div className="form-group">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <label>Current password</label>
+                            <label htmlFor="CurrentPass">Current password</label>
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
@@ -50,6 +50,7 @@ export default function Security() {
                             </button>
                         </div>
                         <input
+                            id="CurrentPass"
                             type={showPassword ? 'text' : 'password'}
                             className="form-input"
                             value={currentPassword}
@@ -59,8 +60,9 @@ export default function Security() {
                     </div>
 
                     <div className="form-group">
-                        <label>New password</label>
+                        <label htmlFor="NewPass">New password</label>
                         <input
+                            id="NewPass"
                             type={showPassword ? 'text' : 'password'}
                             className="form-input"
                             value={newPassword}
@@ -71,8 +73,9 @@ export default function Security() {
                     </div>
 
                     <div className="form-group">
-                        <label>Confirm new password</label>
+                        <label htmlFor="ConfirmPass">Confirm new password</label>
                         <input
+                            htmlFor="ConfirmPass"
                             type={showPassword ? 'text' : 'password'}
                             className="form-input"
                             value={confirmPassword}
@@ -101,8 +104,9 @@ export default function Security() {
 
                 <form onSubmit={handleDeleteAccount}>
                     <div className="form-group">
-                        <label>Current password</label>
+                        <label htmlFor="DeletePass">Current password</label>
                         <input
+                            id="DeletePass"
                             type="password"
                             className="form-input"
                             value={deleteCurrentPassword}

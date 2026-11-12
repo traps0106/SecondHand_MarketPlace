@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 export default function Inventory() {
@@ -10,20 +11,32 @@ export default function Inventory() {
     const [feedback, setFeedback] = useState(null);
 
     const handleInputChange = (id, val) => {
-        setInventory(prev => prev.map(item => item.id === id ? { ...item, newStock: val } : item));
+        setInventory(prev =>
+            prev.map(item =>
+                item.id === id ? { ...item, newStock: val } : item
+            )
+        );
     };
 
     const handleSave = () => {
         let hasInvalid = false;
+
         inventory.forEach(item => {
-            const num = parseInt(item.newStock, 10);
-            if (isNaN(num) || num < 0) hasInvalid = true;
+            const num = Number(item.newStock);
+
+            if (
+                item.newStock.trim() === '' ||
+                !Number.isInteger(num) ||
+                num < 0
+            ) {
+                hasInvalid = true;
+            }
         });
 
         if (hasInvalid) {
             setFeedback({
                 type: 'error',
-                text: 'Enter a whole number of 0 or more. Changes were not saved; saved stock remains 3.'
+                text: 'Enter a whole number of 0 or more. Changes were not saved.'
             });
         } else {
             const updatedInventory = inventory.map(item => ({
@@ -32,7 +45,7 @@ export default function Inventory() {
             }));
 
             const changedItems = updatedInventory.filter((item, index) =>
-                Number(item.newStock) !== inventory[index].savedStock
+                item.savedStock !== inventory[index].savedStock
             );
 
             setInventory(updatedInventory);
@@ -40,73 +53,116 @@ export default function Inventory() {
             setFeedback({
                 type: 'success',
                 text: changedItems.length > 0
-                    ? `Stock saved successfully. ${changedItems.map(item => `${item.name}: ${item.savedStock} units`).join(', ')} saved.`
+                    ? `Stock saved successfully. ${changedItems.map(item =>
+                        `${item.name}: ${item.savedStock} units`
+                    ).join(', ')} saved.`
                     : 'No stock changes were made.'
             });
         }
     };
 
     const handleCancel = () => {
-        setInventory(prev => prev.map(item => ({ ...item, newStock: item.savedStock.toString() })));
+        setInventory(prev =>
+            prev.map(item => ({
+                ...item,
+                newStock: item.savedStock.toString()
+            }))
+        );
+
         setFeedback(null);
     };
 
     return (
         <div className="card">
             <h2 className="card-title">Inventory</h2>
-            <p className="card-subtitle">Manage stock quantities for your own listings. Enter whole numbers, zero or above.</p>
+
+            <p className="card-subtitle">
+                Manage stock quantities for your own listings. Enter whole numbers, zero or above.
+            </p>
 
             {feedback && (
-                <div style={{
-                    padding: '0.75rem',
-                    marginBottom: '1rem',
-                    backgroundColor: feedback.type === 'error' ? '#fef2f2' : '#f0fdf4',
-                    border: `1px solid ${feedback.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
-                    color: feedback.type === 'error' ? '#991b1b' : '#166534',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem'
-                }}>
+                <div
+                    className={`inventory-feedback ${feedback.type}`}
+                    role="status"
+                    aria-live="polite"
+                >
                     {feedback.text}
                 </div>
             )}
 
-            <table className="data-table" style={{ marginBottom: '1.5rem' }}>
+            <table className="data-table inventory-table">
                 <thead>
                     <tr>
-                        <th>Part/vehicle</th>
-                        <th>Saved stock</th>
-                        <th>New stock</th>
-                        <th>Availability</th>
-                        <th>Status</th>
+                        <th scope="col">Part/vehicle</th>
+                        <th scope="col">Saved stock</th>
+                        <th scope="col">New stock</th>
+                        <th scope="col">Availability</th>
+                        <th scope="col">Status</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {inventory.map((item) => (
                         <tr key={item.id}>
                             <td>
                                 <strong>{item.name}</strong>
-                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{item.year}</div>
+                                <div className="inventory-meta">
+                                    {item.year} · {item.id}
+                                </div>
                             </td>
+
                             <td>{item.savedStock}</td>
+
                             <td>
+                                <label
+                                    className="sr-only"
+                                    htmlFor={`stock-${item.id}`}
+                                >
+                                    New stock quantity for {item.name}
+                                </label>
+
                                 <input
-                                    type="text"
-                                    className="form-input"
-                                    style={{ width: '60px', textAlign: 'center' }}
+                                    id={`stock-${item.id}`}
+                                    name={`stock-${item.id}`}
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    className="form-input stock-input"
                                     value={item.newStock}
-                                    onChange={(e) => handleInputChange(item.id, e.target.value)}
+                                    onChange={(e) =>
+                                        handleInputChange(item.id, e.target.value)
+                                    }
                                 />
                             </td>
+
                             <td>{item.avail}</td>
-                            <td><span className="status-badge">{item.status}</span></td>
+
+                            <td>
+                                <span className="status-badge">
+                                    {item.status}
+                                </span>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={handleSave} className="btn-primary">Save changes</button>
-                <button onClick={handleCancel} className="btn-secondary">Cancel</button>
+            <div className="inventory-actions">
+                <button
+                    onClick={handleSave}
+                    className="btn-primary"
+                    type="button"
+                >
+                    Save changes
+                </button>
+
+                <button
+                    onClick={handleCancel}
+                    className="btn-secondary"
+                    type="button"
+                >
+                    Cancel
+                </button>
             </div>
         </div>
     );

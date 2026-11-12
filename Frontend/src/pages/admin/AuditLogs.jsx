@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export default function AuditLogs() {
@@ -10,33 +11,49 @@ export default function AuditLogs() {
 
     return (
         <div>
-            <div style={{ marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Audit logs</h2>
-                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Read-only history of account and listing actions · All times Bahrain (UTC+3).</p>
+            <div className="page-heading">
+                <h2>Audit logs</h2>
+                <p>
+                    Read-only history of account and listing actions · All times Bahrain (UTC+3).
+                </p>
             </div>
 
             <div className="card">
                 <h3 className="card-title">Event history</h3>
+
                 <table className="data-table">
                     <thead>
                         <tr>
-                            <th>Date / time</th>
-                            <th>Actor</th>
-                            <th>Action</th>
-                            <th>Target</th>
-                            <th>Outcome</th>
-                            <th>Details</th>
+                            <th scope="col">Date / time</th>
+                            <th scope="col">Actor</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Target</th>
+                            <th scope="col">Outcome</th>
+                            <th scope="col">Details</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {logs.map((log, idx) => (
                             <tr key={idx}>
-                                <td style={{ fontSize: '0.75rem', color: '#6b7280' }}>{log.time}</td>
+                                <td className="audit-time">{log.time}</td>
                                 <td><strong>{log.actor}</strong></td>
                                 <td>{log.action}</td>
                                 <td>{log.target}</td>
-                                <td>{log.outcome}</td>
-                                <td><button style={{ border: 'none', background: 'none', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.75rem' }}>View</button></td>
+                                <td>
+                                    <span className="status-badge">
+                                        {log.outcome}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button
+                                        className="audit-view-button"
+                                        type="button"
+                                        aria-label={`View details for ${log.action}, target ${log.target}`}
+                                    >
+                                        View
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -44,13 +61,24 @@ export default function AuditLogs() {
             </div>
 
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <h4 style={{ fontWeight: 'bold' }}>Event EV-208 · Details</h4>
+                <div className="audit-detail-heading">
+                    <h3 className="card-title">
+                        Event EV-208 · Details
+                    </h3>
                     <span className="status-badge">Success</span>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>04 Nov 2026 · 09:42:18 UTC+3 · Actor: AdminName (Admin)</p>
-                <p style={{ fontSize: '0.75rem', fontWeight: 600, margin: '0.25rem 0' }}>Listing approved · L-201 · Toyota Corolla alternator · Seller: UserName</p>
-                <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Change: In review → Active · Seller notified. Recorded by system after approval.</p>
+
+                <p className="audit-time">
+                    04 Nov 2026 · 09:42:18 UTC+3 · Actor: AdminName (Admin)
+                </p>
+
+                <p className="audit-event-description">
+                    Listing approved · L-201 · Toyota Corolla alternator · Seller: UserName
+                </p>
+
+                <p className="audit-change">
+                    Change: In review → Active · Seller notified. Recorded by system after approval.
+                </p>
             </div>
         </div>
     );

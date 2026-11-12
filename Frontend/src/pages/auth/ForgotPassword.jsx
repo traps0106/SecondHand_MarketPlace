@@ -49,8 +49,9 @@ export default function ForgotPassword() {
 
                             <form onSubmit={handleSendLink}>
                                 <div className="form-group">
-                                    <label>Email address</label>
+                                    <label htmlFor="EmailSol">Email address</label>
                                     <input
+                                        id="EmailSol"
                                         type="email"
                                         className="form-input"
                                         value={email}

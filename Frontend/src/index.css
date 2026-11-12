@@ -20,6 +20,7 @@ body {
 .app-header h1 {
   font-size: 1.25rem;
   font-weight: 700;
+  color: #111827;
 }
 
 /* Layout */
@@ -41,7 +42,7 @@ body {
 .sidebar-title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: #4b5563;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -69,7 +70,7 @@ body {
 .nav-item.active {
   background-color: #e5e7eb;
   font-weight: 600;
-  color: #000000;
+  color: #111827;
 }
 
 .main-content {
@@ -91,11 +92,12 @@ body {
   font-size: 1.125rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: #111827;
 }
 
 .card-subtitle {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: #4b5563;
   margin-bottom: 1rem;
 }
 
@@ -110,15 +112,23 @@ body {
   cursor: pointer;
 }
 
+.btn-primary:hover {
+  background-color: #1f2937;
+}
+
 .btn-secondary {
   background-color: #ffffff;
-  border: 1px solid #d1d5db;
+  border: 1px solid #6b7280;
   color: #374151;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #f3f4f6;
 }
 
 .form-group {
@@ -130,15 +140,28 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.25rem;
+  color: #374151;
 }
 
 .form-input {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #6b7280;
   border-radius: 4px;
   font-size: 0.875rem;
   background-color: #ffffff;
+  color: #111827;
+}
+
+.form-input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
+.form-input:focus {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+  border-color: #1d4ed8;
 }
 
 .filter-toolbar {
@@ -160,23 +183,25 @@ body {
   background-color: #f3f4f6;
   padding: 0.75rem;
   font-size: 0.75rem;
-  color: #4b5563;
+  color: #374151;
   border-bottom: 1px solid #e5e7eb;
 }
 
 .data-table td {
   padding: 0.75rem;
   border-bottom: 1px solid #e5e7eb;
+  color: #111827;
 }
 
 .status-badge {
   display: inline-block;
   padding: 0.125rem 0.5rem;
   font-size: 0.75rem;
-  border: 1px solid #d1d5db;
-  background-color: #f9fafb;
+  color: #1f2937;
+  border: 1px solid #9ca3af;
+  background-color: #e5e7eb;
   border-radius: 4px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Auth Center Screen */
@@ -191,4 +216,283 @@ body {
   width: 100%;
   margin: 4rem auto;
   padding: 1.5rem;
+}
+
+/* Accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+/* My Listings Page */
+.listings-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.listing-meta {
+  color: #4b5563;
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.listing-action {
+  border: none;
+  background: none;
+  color: #1d4ed8;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.listing-delete {
+  border: none;
+  background: none;
+  color: #b91c1c;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.delete-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.delete-listing-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #1f2937;
+}
+
+.delete-description {
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-bottom: 1rem;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Keyboard Accessibility */
+.listing-action:focus-visible,
+.listing-delete:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 3px;
+}
+
+
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+
+.selected-order-row {
+  background-color: #e5e7eb;
+  cursor: pointer;
+}
+
+.data-table tbody tr:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: -2px;
+}
+
+.order-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+/* Sold Items page spacing */
+.page-heading {
+  margin-bottom: 1.5rem;
+}
+
+.filter-toolbar {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.card {
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  margin-bottom: 0.25rem;
+}
+
+.card-subtitle {
+  margin-bottom: 1rem;
+}
+
+.order-table-footer {
+  margin-top: 1.25rem;
+}
+
+
+
+/* User Management */
+.user-management-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.user-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.selected-user-row {
+  background-color: #e5e7eb;
+}
+
+.user-detail {
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-top: 0.2rem;
+}
+
+.user-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.user-management-note {
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+@media (max-width: 768px) {
+  .user-management-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Listing Moderation */
+.moderation-toolbar {
+  max-width: 600px;
+}
+
+.moderation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.moderation-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.selected-listing-row {
+  background-color: #e5e7eb;
+}
+
+.listing-meta {
+  font-size: 0.75rem;
+  color: #374151;
+  margin-top: 0.2rem;
+}
+
+.moderation-preview-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+.moderation-meta {
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+.moderation-spacing {
+  margin: 0.5rem 0;
+}
+
+.moderation-description {
+  margin-bottom: 1rem;
+}
+
+.moderation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .moderation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Audit Logs */
+.audit-time {
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.audit-view-button {
+  border: none;
+  background: none;
+  color: #1d4ed8;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.audit-view-button:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 3px;
+}
+
+.audit-detail-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.audit-event-description {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0.25rem 0;
+}
+
+.audit-change {
+  font-size: 0.75rem;
+  color: #374151;
 }

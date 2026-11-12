@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 export default function SoldItems() {
@@ -41,39 +42,45 @@ export default function SoldItems() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All statuses');
 
-    return (
-        <div style={{ width: '100%' }}>
-            {/* Title & Description */}
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0 0 0.25rem 0', color: '#111827' }}>
-                Sold items
-            </h1>
-            <p style={{ fontSize: '0.875rem', color: '#4b5563', margin: '0 0 1.5rem 0' }}>
-                Review received orders for your secondhand car parts.
-            </p>
+    const filteredOrders = orders.filter((order) => {
+        const searchMatch =
+            order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.buyer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.part.toLowerCase().includes(searchTerm.toLowerCase());
 
-            {/* Search & Filter Toolbar */}
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginBottom: '1.5rem', width: '100%' }}>
-                <div style={{ flex: '1 1 auto' }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: '#111827' }}>
-                        Search received orders
-                    </label>
+        const statusMatch =
+            statusFilter === 'All statuses' || order.status === statusFilter;
+
+        return searchMatch && statusMatch;
+    });
+
+    return (
+        <div>
+            <div className="page-heading">
+                <h2>Sold items</h2>
+                <p>Review received orders for your secondhand car parts.</p>
+            </div>
+
+            <div className="filter-toolbar">
+                <div className="filter-search">
+                    <label htmlFor="sold-search">Search received orders</label>
                     <input
+                        id="sold-search"
+                        name="sold-search"
                         type="text"
                         className="form-input"
-                        style={{ width: '100%', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem', boxSizing: 'border-box' }}
                         placeholder="Order number, buyer or part name"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
-                <div style={{ width: '200px', flexShrink: 0 }}>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', color: '#111827' }}>
-                        Order status
-                    </label>
+                <div className="filter-status">
+                    <label htmlFor="sold-status">Order status</label>
                     <select
+                        id="sold-status"
+                        name="sold-status"
                         className="form-input"
-                        style={{ width: '100%', padding: '0.5rem', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem', backgroundColor: '#ffffff', boxSizing: 'border-box' }}
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -84,106 +91,97 @@ export default function SoldItems() {
                     </select>
                 </div>
 
-                <button
-                    className="btn-secondary"
-                    style={{
-                        padding: '0.5rem 1rem',
-                        height: '38px',
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '4px',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap'
-                    }}
-                >
+                <button className="btn-secondary" type="button">
                     Apply filters
                 </button>
             </div>
 
-            {/* Received Orders Table Card */}
-            <div className="card" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.125rem', fontWeight: 600, margin: '0 0 0.25rem 0', color: '#111827' }}>
-                    Received orders
-                </h2>
-                <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: '0 0 1rem 0' }}>
-                    3 simulated orders · Newest first · Only orders for your parts are shown
+            <div className="card">
+                <h3 className="card-title">Received orders</h3>
+                <p className="card-subtitle">
+                    {filteredOrders.length} simulated orders · Newest first · Only orders for your parts are shown
                 </p>
 
-                <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                <table className="data-table">
                     <thead>
-                        <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>Order</th>
-                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>Date</th>
-                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>Buyer</th>
-                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>Secondhand car part</th>
-                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>Qty</th>
-                            <th style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#4b5563', fontWeight: 600 }}>Status</th>
+                        <tr>
+                            <th scope="col">Order</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Buyer</th>
+                            <th scope="col">Secondhand car part</th>
+                            <th scope="col">Qty</th>
+                            <th scope="col">Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.map((o) => {
-                            const isSelected = selectedOrder?.id === o.id;
-                            return (
-                                <tr
-                                    key={o.id}
-                                    onClick={() => setSelectedOrder(o)}
-                                    style={{
-                                        cursor: 'pointer',
-                                        backgroundColor: isSelected ? '#e5e7eb' : 'transparent',
-                                        borderBottom: '1px solid #e5e7eb',
-                                    }}
-                                >
-                                    <td style={{ padding: '0.75rem', textDecoration: 'underline' }}>{o.id}</td>
-                                    <td style={{ padding: '0.75rem' }}>{o.date}</td>
-                                    <td style={{ padding: '0.75rem' }}>{o.buyer}</td>
-                                    <td style={{ padding: '0.75rem' }}>{o.part}</td>
-                                    <td style={{ padding: '0.75rem' }}>{o.qty}</td>
-                                    <td style={{ padding: '0.75rem' }}>{o.status}</td>
-                                </tr>
-                            );
-                        })}
+                        {filteredOrders.length > 0 ? (
+                            filteredOrders.map((order) => {
+                                const isSelected = selectedOrder?.id === order.id;
+
+                                return (
+                                    <tr
+                                        key={order.id}
+                                        onClick={() => setSelectedOrder(order)}
+                                        className={isSelected ? 'selected-order-row' : ''}
+                                        tabIndex={0}
+                                        aria-label={`View order ${order.id}`}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                setSelectedOrder(order);
+                                            }
+                                        }}
+                                    >
+                                        <td>
+                                            <strong>{order.id}</strong>
+                                        </td>
+                                        <td>{order.date}</td>
+                                        <td>{order.buyer}</td>
+                                        <td>{order.part}</td>
+                                        <td>{order.qty}</td>
+                                        <td>
+                                            <span className="status-badge">
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        ) : (
+                            <tr>
+                                <td colSpan="6">No matching orders found.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
 
-                {/* Footer: Left text & Right Page 1 button */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem', width: '100%' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Showing 1–3 of 3</span>
-                    <button className="btn-secondary" style={{ padding: '0.375rem 0.875rem', backgroundColor: '#ffffff', border: '1px solid #d1d5db', borderRadius: '4px', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer' }}>
+                <div className="order-table-footer">
+                    <span>
+                        Showing {filteredOrders.length > 0 ? 1 : 0}–{filteredOrders.length} of {filteredOrders.length}
+                    </span>
+                    <button className="btn-secondary" type="button" disabled>
                         Page 1
                     </button>
                 </div>
             </div>
 
-            {/* Selected Order Detail Box */}
             {selectedOrder && (
-                <div className="card" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                    <h2 style={{ fontSize: '1.125rem', fontWeight: 600, margin: '0 0 0.75rem 0', color: '#111827' }}>
+                <div className="card">
+                    <h3 className="card-title">
                         Order {selectedOrder.id} · Received order details
-                    </h2>
+                    </h3>
 
-                    <p style={{ fontSize: '0.875rem', color: '#111827', margin: '0 0 0.5rem 0' }}>
+                    <p className="order-summary-part">
                         {selectedOrder.part} · {selectedOrder.vehicle} · {selectedOrder.condition} · Quantity: {selectedOrder.qty}
                     </p>
 
-                    <p style={{ fontSize: '0.875rem', color: '#374151', margin: '0 0 1rem 0' }}>
+                    <p className="order-summary-details">
                         Buyer: {selectedOrder.buyer} · Seller: {selectedOrder.seller} · Placed {selectedOrder.date} · {selectedOrder.status}
                     </p>
 
-                    <div
-                        style={{
-                            padding: '0.75rem 1rem',
-                            backgroundColor: '#f3f4f6',
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            color: '#374151',
-                            lineHeight: 1.4,
-                        }}
-                    >
+                    <p className="order-summary-note">
                         Simulated order only — no actual financial transaction. Only your listing and its ordered quantity are included in this detail view.
-                    </div>
+                    </p>
                 </div>
             )}
         </div>
