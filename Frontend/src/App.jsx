@@ -11,6 +11,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 
 // Public / Buyer Pages
 import Browse from './pages/public/Browse';
+import Cart from './pages/public/Cart';
 import PartDetails from './pages/public/PartDetails';
 import OrderConfirmation from './pages/public/OrderConfirmation';
 import AccessDenied from './pages/public/AccessDenied';
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/browse" replace />} />
         <Route element={<PublicLayout />}>
           <Route path="/browse" element={<Browse />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/parts/:id" element={<PartDetails />} />
           <Route path="/access-denied" element={<AccessDenied />} />
           <Route path="*" element={<NotFound />} />

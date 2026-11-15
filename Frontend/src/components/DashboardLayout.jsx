@@ -21,8 +21,8 @@ export default function DashboardLayout({ isAdmin = false }) {
                 <h1>Parts Market</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <Link to="/browse" className="public-nav-link">Browse parts</Link>
-                    <span style={{ fontSize: '0.875rem', color: '#4b5563' }}>
-                        {isAdmin ? 'Admin Portal' : 'Seller Portal'}
+                    <span className="portal-label">
+                        {isAdmin ? 'Admin Portal' : 'User Portal'}
                     </span>
                 </div>
             </header>
@@ -61,18 +61,10 @@ export default function DashboardLayout({ isAdmin = false }) {
                                     </NavLink>
 
                                     {/* Sidebar Separator Line & Log Out Button */}
-                                    <div style={{ borderTop: '1px solid #e5e7eb', margin: '0.75rem 0' }} />
+                                    <div className="nav-separator" />
                                     <button
                                         onClick={handleLogout}
                                         className="nav-item"
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            width: '100%',
-                                            textAlign: 'left',
-                                            cursor: 'pointer',
-                                            color: '#374151',
-                                        }}
                                     >
                                         Log out
                                     </button>
@@ -93,18 +85,10 @@ export default function DashboardLayout({ isAdmin = false }) {
                                     </NavLink>
 
                                     {/* Sidebar Separator Line & Log Out Button */}
-                                    <div style={{ borderTop: '1px solid #e5e7eb', margin: '0.75rem 0' }} />
+                                    <div className="nav-separator" />
                                     <button
                                         onClick={handleLogout}
                                         className="nav-item"
-                                        style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            width: '100%',
-                                            textAlign: 'left',
-                                            cursor: 'pointer',
-                                            color: '#374151',
-                                        }}
                                     >
                                         Log out
                                     </button>

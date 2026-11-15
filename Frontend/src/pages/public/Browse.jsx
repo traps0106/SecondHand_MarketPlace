@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CATEGORIES, PARTS, formatBHD, yearRange } from '../../data/parts';
+import { formatBHD, yearRange } from '../../data/parts';
+import { getParts } from '../../api/parts';
 
 const DEFAULT_FILTERS = {
     query: '',
@@ -8,7 +9,7 @@ const DEFAULT_FILTERS = {
     categories: [],
     make: '',
     year: '',
-    conditions: ['Used'],
+    conditions: [],
     inStock: true,
     min: '',
     max: '40',
@@ -22,8 +23,9 @@ const EMPTY_FILTERS = {
     max: '',
 };
 
-const MAKES = [...new Set(PARTS.map((p) => p.make))].sort();
 const YEARS = Array.from({ length: 2026 - 2010 + 1 }, (_, i) => String(2026 - i));
+
+const distinct = (list, key) => [...new Set((list ?? []).map((p) => p[key]))].sort();
 
 const toggle = (list, value) =>
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -34,7 +36,7 @@ function applyFilters(parts, f) {
     const max = f.max === '' ? null : Number(f.max);
 
     const result = parts.filter((p) => {
-        if (q && !`${p.name} ${p.make} ${p.model} ${p.id}`.toLowerCase().includes(q)) return false;
+        if (q && !`${p.name} ${p.make} ${p.model} ${p.partNumber ?? ''} ${p.id}`.toLowerCase().includes(q)) return false;
         if (f.categories.length && !f.categories.includes(p.category)) return false;
         if (f.make && p.make !== f.make) return false;
         if (f.year && !(p.yearFrom <= Number(f.year) && Number(f.year) <= p.yearTo)) return false;
@@ -55,7 +57,17 @@ export default function Browse() {
     const [draft, setDraft] = useState(DEFAULT_FILTERS);
     const applied = draft;
 
-    const results = useMemo(() => applyFilters(PARTS, applied), [applied]);
+    const [parts, setParts] = useState(null);
+    const [loadError, setLoadError] = useState('');
+
+    useEffect(() => {
+        getParts().then(setParts).catch((e) => setLoadError(e.message));
+    }, []);
+
+    const makes = useMemo(() => distinct(parts, 'make'), [parts]);
+    const categories = useMemo(() => distinct(parts, 'category'), [parts]);
+    const conditionOptions = useMemo(() => distinct(parts, 'condition'), [parts]);
+    const results = useMemo(() => applyFilters(parts ?? [], applied), [parts, applied]);
 
     const update = (patch) => setDraft((d) => ({ ...d, ...patch }));
     const submit = (e) => e.preventDefault();
@@ -79,7 +91,7 @@ export default function Browse() {
 
                 <fieldset className="filter-fieldset">
                     <legend>Category</legend>
-                    {CATEGORIES.map((c) => (
+                    {categories.map((c) => (
                         <label key={c} className="check-row">
                             <input
                                 type="checkbox"
@@ -95,7 +107,7 @@ export default function Browse() {
                     <label htmlFor="filter-make">Make</label>
                     <select id="filter-make" className="form-input" value={draft.make} onChange={(e) => update({ make: e.target.value })}>
                         <option value="">All makes</option>
-                        {MAKES.map((m) => <option key={m} value={m}>{m}</option>)}
+                        {makes.map((m) => <option key={m} value={m}>{m}</option>)}
                     </select>
                 </div>
 
@@ -109,7 +121,7 @@ export default function Browse() {
 
                 <fieldset className="filter-fieldset">
                     <legend>Condition</legend>
-                    {['Used', 'Refurbished'].map((c) => (
+                    {conditionOptions.map((c) => (
                         <label key={c} className="check-row">
                             <input
                                 type="checkbox"
@@ -162,7 +174,7 @@ export default function Browse() {
                             id="part-search"
                             type="search"
                             className="form-input"
-                            placeholder="Part name, make, model or listing ID"
+                            placeholder="Part name, make, model or part number"
                             value={draft.query}
                             onChange={(e) => update({ query: e.target.value })}
                         />
@@ -195,11 +207,13 @@ export default function Browse() {
                     </div>
                 )}
 
+                {loadError && <div className="banner" role="alert">{loadError}. Make sure the backend is running.</div>}
+
                 <h3 className="results-count" role="status" aria-live="polite">
-                    {results.length} {results.length === 1 ? 'part' : 'parts'} found
+                    {parts === null ? (loadError ? '' : 'Loading parts…') : `${results.length} ${results.length === 1 ? 'part' : 'parts'} found`}
                 </h3>
 
-                {results.length === 0 ? (
+                {parts === null ? null : results.length === 0 ? (
                     <div className="card empty-state">
                         <h4 className="delete-title">No parts match your search</h4>
                         <p className="delete-description">Try fewer filters, a different part name or a wider price range.</p>
@@ -212,7 +226,7 @@ export default function Browse() {
                                 <div className="photo-placeholder" aria-hidden="true">Part photo</div>
                                 <div className="part-card-body">
                                     <h4 className="part-card-title">{p.name}</h4>
-                                    <p className="listing-meta">{yearRange(p)} · {p.make} {p.model} · {p.id}</p>
+                                    <p className="listing-meta">{yearRange(p)} · {p.make} {p.model} · {p.partNumber ?? p.id}</p>
                                     <p className="listing-meta">
                                         <span className="tag">{p.condition}</span> {p.stock > 0 ? 'In stock' : 'Out of stock'}
                                     </p>
@@ -227,9 +241,9 @@ export default function Browse() {
                     </ul>
                 )}
 
-                <p className="listing-meta" style={{ marginTop: '1rem' }}>
+                {parts !== null && <p className="listing-meta" style={{ marginTop: '1rem' }}>
                     Showing {results.length === 0 ? '0' : `1–${results.length}`} of {results.length} · Page 1 of 1
-                </p>
+                </p>}
             </section>
         </div>
     );

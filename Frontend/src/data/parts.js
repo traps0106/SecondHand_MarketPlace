@@ -21,4 +21,7 @@ export const PARTS = [
 ];
 
 export const formatBHD = (n) => `BHD ${Number(n).toFixed(3)}`;
-export const yearRange = (p) => `${p.yearFrom}–${p.yearTo}`;
+export const yearRange = (p) => (p.yearFrom === p.yearTo ? `${p.yearFrom}` : `${p.yearFrom}–${p.yearTo}`);
+
+export const formatDate = (d) =>
+    new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
