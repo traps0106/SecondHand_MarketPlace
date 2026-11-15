@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { PARTS, formatBHD, yearRange } from '../../data/parts';
+import { Link, Navigate, useLocation } from 'react-router-dom';
+import { formatBHD, yearRange } from '../../data/parts';
 
 export default function OrderConfirmation() {
     const { state } = useLocation();
-    const part = state?.part ?? PARTS[0];
-    const qty = state?.qty ?? 1;
+    if (!state?.part) return <Navigate to="/browse" replace />;
+    const { part } = state;
+    const qty = state.qty ?? 1;
     const remaining = Math.max(part.stock - qty, 0);
 
     return (
@@ -18,7 +19,7 @@ export default function OrderConfirmation() {
 
             <section className="card" aria-labelledby="order-summary-title">
                 <h3 className="card-title" id="order-summary-title">Order summary</h3>
-                <p className="summary-line">{part.name} · {yearRange(part)} · {part.id}</p>
+                <p className="summary-line">{part.name} · {yearRange(part)} · {part.partNumber ?? part.id}</p>
                 <p className="summary-line">Seller: {part.seller} · Quantity: {qty}</p>
                 <p className="summary-line">
                     Total: {formatBHD(part.price * qty)} (simulated, no payment taken)

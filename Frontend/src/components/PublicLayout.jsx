@@ -26,6 +26,7 @@ export default function PublicLayout({ requireAuth = false }) {
                 <nav aria-label="Main" className="public-nav">
                     {signedIn && <span className="public-nav-user">Signed in</span>}
                     <Link to="/browse" className="public-nav-link">Browse parts</Link>
+                    <Link to="/cart" className="public-nav-link">Cart</Link>
                     {signedIn ? (
                         <>
                             <Link to="/account/overview" className="public-nav-link">My account</Link>
