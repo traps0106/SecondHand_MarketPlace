@@ -1,3 +1,5 @@
+import { Decimal128 } from "mongodb";
+import { LISTING_STATUS } from "../config/referenceData.js";
 import { getDB } from "../config/db.js";
 
 // Data access for a seller's own listings. Every query is scoped by sellerId,
@@ -30,6 +32,31 @@ export function toSellerListing(doc) {
     };
 }
 
+// API field -> stored field. Validated input is mapped through this, so the
+// storage schema can change without touching routes or the UI.
+const STORAGE_FIELDS = {
+    name: "title",
+    category: "category",
+    condition: "condition",
+    make: "vehicleMake",
+    model: "vehicleModel",
+    year: "vehicleYear",
+    price: "price",
+    quantity: "quantity",
+    description: "description",
+    partNumber: "partNumber",
+};
+
+export function toListingDocument(input) {
+    const doc = {};
+    for (const [field, value] of Object.entries(input)) {
+        const key = STORAGE_FIELDS[field];
+        if (!key) continue;
+        doc[key] = field === "price" ? Decimal128.fromString(value) : value;
+    }
+    return doc;
+}
+
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export async function findSellerListings(sellerId, { search, status } = {}) {
@@ -52,4 +79,18 @@ export async function findSellerListings(sellerId, { search, status } = {}) {
 export async function findSellerListing(sellerId, _id) {
     const doc = await listings().findOne({ _id, sellerId });
     return doc ? toSellerListing(doc) : null;
+}
+
+// New listings always start in review; sellers cannot publish directly.
+export async function createSellerListing(sellerId, input) {
+    const now = new Date();
+    const doc = {
+        ...toListingDocument(input),
+        sellerId,
+        status: LISTING_STATUS.PENDING,
+        createdAt: now,
+        updatedAt: now,
+    };
+    const { insertedId } = await listings().insertOne(doc);
+    return toSellerListing({ ...doc, _id: insertedId });
 }

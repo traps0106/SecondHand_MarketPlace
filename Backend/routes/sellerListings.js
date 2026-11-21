@@ -1,8 +1,13 @@
 import { Router } from "express";
 import { LISTING_STATUS } from "../config/referenceData.js";
 import { requireUser } from "../middleware/currentUser.js";
-import { findSellerListing, findSellerListings } from "../repositories/sellerListings.js";
+import {
+    createSellerListing,
+    findSellerListing,
+    findSellerListings,
+} from "../repositories/sellerListings.js";
 import { toObjectId } from "../utils/listings.js";
+import { validateListing } from "../validators/listing.js";
 
 // Seller-facing CRUD for the caller's own listings: /api/seller/listings
 const router = Router();
@@ -31,6 +36,17 @@ router.get("/", async (req, res) => {
 
     const items = await findSellerListings(req.user._id, { search: search.trim(), status });
     res.json({ items, total: items.length });
+});
+
+// POST /api/seller/listings
+router.post("/", async (req, res) => {
+    const { value, errors } = validateListing(req.body);
+    if (Object.keys(errors).length) {
+        return res.status(400).json({ error: "Some fields are invalid", details: errors });
+    }
+
+    const listing = await createSellerListing(req.user._id, value);
+    res.status(201).location(`${req.baseUrl}/${listing.id}`).json(listing);
 });
 
 // GET /api/seller/listings/:id
