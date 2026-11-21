@@ -27,6 +27,11 @@ export async function connectDB() {
     }
 }
 
+// Needed to start sessions for multi-document transactions.
+export function getClient() {
+    return client;
+}
+
 export function getDB() {
     if (!db) {
         throw new Error('Database is not connected');

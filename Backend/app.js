@@ -5,6 +5,7 @@ import adminRoutes from "./routes/admin.js";
 import authRoutes from "./routes/auth.js";
 import cartRoutes from "./routes/cart.js";
 import metaRoutes from "./routes/meta.js";
+import orderRoutes from "./routes/orders.js";
 import partRoutes from "./routes/parts.js";
 import sellerListingRoutes from "./routes/sellerListings.js";
 import sessionRoutes from "./routes/session.js";
@@ -26,6 +27,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/parts", partRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/seller/listings", sellerListingRoutes);
 
 app.use((req, res) => {
