@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatBHD, yearRange } from '../../data/parts';
+import { formatBHD, yearRange } from '../../utils/format';
 import { clearCart, getCart, removeFromCart, setCartQty } from '../../api/cart';
 
 export default function Cart() {
