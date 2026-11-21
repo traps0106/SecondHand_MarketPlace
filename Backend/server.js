@@ -5,6 +5,7 @@ import { connectDB, getDB } from "./config/db.js";
 import cartRoutes from "./routes/cart.js";
 import metaRoutes from "./routes/meta.js";
 import partRoutes from "./routes/parts.js";
+import sessionRoutes from "./routes/session.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/meta", metaRoutes);
+app.use("/api/session", sessionRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/parts", partRoutes);
 
