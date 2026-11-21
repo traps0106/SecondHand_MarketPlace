@@ -94,3 +94,35 @@ export async function createSellerListing(sellerId, input) {
     const { insertedId } = await listings().insertOne(doc);
     return toSellerListing({ ...doc, _id: insertedId });
 }
+
+// Fields a seller can change without the listing going back to review.
+const NO_REVIEW_FIELDS = new Set(["quantity"]);
+
+// Partial update of the seller's own listing. Editing what buyers see
+// (title, price, vehicle, ...) sends the listing back to moderation.
+// Returns the updated listing, or null when it is not the seller's.
+export async function updateSellerListing(sellerId, _id, input) {
+    const set = { ...toListingDocument(input), updatedAt: new Date() };
+    const needsReview = Object.keys(input).some((field) => !NO_REVIEW_FIELDS.has(field));
+    if (needsReview) set.status = LISTING_STATUS.PENDING;
+
+    const doc = await listings().findOneAndUpdate(
+        { _id, sellerId },
+        { $set: set },
+        { returnDocument: "after" }
+    );
+    return doc ? toSellerListing(doc) : null;
+}
+
+// Deletes the seller's own listing and removes it from every cart.
+// Returns false when the listing does not exist or belongs to someone else.
+export async function deleteSellerListing(sellerId, _id) {
+    const { deletedCount } = await listings().deleteOne({ _id, sellerId });
+    if (!deletedCount) return false;
+
+    await getDB().collection("carts").updateMany(
+        { "items.listingId": _id },
+        { $pull: { items: { listingId: _id } }, $set: { updatedAt: new Date() } }
+    );
+    return true;
+}

@@ -3,8 +3,10 @@ import { LISTING_STATUS } from "../config/referenceData.js";
 import { requireUser } from "../middleware/currentUser.js";
 import {
     createSellerListing,
+    deleteSellerListing,
     findSellerListing,
     findSellerListings,
+    updateSellerListing,
 } from "../repositories/sellerListings.js";
 import { toObjectId } from "../utils/listings.js";
 import { validateListing } from "../validators/listing.js";
@@ -55,6 +57,27 @@ router.get("/:id", async (req, res) => {
     const listing = await findSellerListing(req.user._id, req.listingId);
     if (!listing) return res.status(404).json({ error: "Listing not found" });
     res.json(listing);
+});
+
+// PATCH /api/seller/listings/:id  (send only the fields that change)
+// A quantity-only update (Inventory page) keeps the listing live; any other
+// change sends it back to review.
+router.patch("/:id", async (req, res) => {
+    const { value, errors } = validateListing(req.body, { partial: true });
+    if (Object.keys(errors).length) {
+        return res.status(400).json({ error: "Some fields are invalid", details: errors });
+    }
+
+    const listing = await updateSellerListing(req.user._id, req.listingId, value);
+    if (!listing) return res.status(404).json({ error: "Listing not found" });
+    res.json(listing);
+});
+
+// DELETE /api/seller/listings/:id
+router.delete("/:id", async (req, res) => {
+    const deleted = await deleteSellerListing(req.user._id, req.listingId);
+    if (!deleted) return res.status(404).json({ error: "Listing not found" });
+    res.status(204).end();
 });
 
 export default router;
