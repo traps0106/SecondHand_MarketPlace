@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { LISTING_STATUS } from "../config/referenceData.js";
+import { requireListingOwnerOrAdmin } from "../middleware/authorize.js";
 import { requireUser } from "../middleware/currentUser.js";
 import {
     createSellerListing,
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
 // PATCH /api/seller/listings/:id  (send only the fields that change)
 // A quantity-only update (Inventory page) keeps the listing live; any other
 // change sends it back to review.
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", requireListingOwnerOrAdmin, async (req, res) => {
     const { value, errors } = validateListing(req.body, { partial: true });
     if (Object.keys(errors).length) {
         return res.status(400).json({ error: "Some fields are invalid", details: errors });
@@ -74,7 +75,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // DELETE /api/seller/listings/:id
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireListingOwnerOrAdmin, async (req, res) => {
     const deleted = await deleteSellerListing(req.user._id, req.listingId);
     if (!deleted) return res.status(404).json({ error: "Listing not found" });
     res.status(204).end();

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { register } from '../../api/session';
 
 function validate(v) {
     const e = {};
@@ -24,15 +25,27 @@ export default function Register() {
         setValues((v) => ({ ...v, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
     const errorCount = Object.keys(errors).length;
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const found = validate(values);
-        setErrors(found);
         if (Object.keys(found).length === 0) {
-            navigate('/login', { state: { registered: true } });
-        } else {
-            requestAnimationFrame(() => document.getElementById('register-error-summary')?.focus());
+            try {
+                await register({
+                    name: values.fullName.trim(),
+                    email: values.email.trim(),
+                    password: values.password,
+                    accountType: values.sellerName.trim() ? 'seller' : 'buyer',
+                });
+                navigate('/login', { state: { registered: true } });
+                return;
+            } catch (err) {
+                // Server-side problems (duplicate email, weak password, ...) show on the field.
+                const field = err.status === 409 || err.details?.email ? 'email' : 'password';
+                found[field] = err.details?.[field] ?? err.message;
+            }
         }
+        setErrors(found);
+        requestAnimationFrame(() => document.getElementById('register-error-summary')?.focus());
     };
 
     const describe = (name) => (errors[name] ? { 'aria-invalid': 'true', 'aria-describedby': `${name}-error` } : {});

@@ -120,9 +120,13 @@ export async function deleteSellerListing(sellerId, _id) {
     const { deletedCount } = await listings().deleteOne({ _id, sellerId });
     if (!deletedCount) return false;
 
-    await getDB().collection("carts").updateMany(
-        { "items.listingId": _id },
-        { $pull: { items: { listingId: _id } }, $set: { updatedAt: new Date() } }
-    );
+    await removeFromCarts(_id);
     return true;
+}
+
+export function removeFromCarts(listingId) {
+    return getDB().collection("carts").updateMany(
+        { "items.listingId": listingId },
+        { $pull: { items: { listingId } }, $set: { updatedAt: new Date() } }
+    );
 }
