@@ -18,7 +18,7 @@ export async function connectDB() {
 
         db = client.db(process.env.DB_NAME);
 
-        console.log('MongoDB connected successfully yoooooooo');
+        console.log(`MongoDB connected (database: ${db.databaseName})`);
 
         return db;
     } catch (error) {
