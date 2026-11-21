@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signIn } from '../../auth';
-import { createSession } from '../../api/session';
+import { login } from '../../api/session';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -20,12 +20,11 @@ export default function Login() {
             return;
         }
 
-        // The account and its role come from the database. Passwords are not
-        // verified yet; that arrives with the authentication milestone.
+        // The server checks the password and returns a JWT plus the account.
         setSubmitting(true);
         try {
-            const user = await createSession(email.trim());
-            signIn(user);
+            const { user, token } = await login(email.trim(), password);
+            signIn(user, token);
             navigate(user.role === 'admin' ? '/admin/users' : '/account/overview');
         } catch (err) {
             setErrorMessage(err.message);
@@ -50,7 +49,7 @@ export default function Login() {
                 <div className="card">
                     <h2 className="card-title">Sign in</h2>
                     <p className="card-subtitle">
-                        Log in with the email address linked to your account.
+                        Log in with your email address and password.
                     </p>
 
                     {errorMessage && (

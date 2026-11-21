@@ -3,7 +3,7 @@
 A marketplace for secondhand car parts: a React + Vite frontend and a Node.js (Express) API backed by MongoDB Atlas.
 
 Browse, part details, cart and the seller pages (My listings, Create/Edit listing, Inventory) read and write
-the database. The remaining pages (orders, sold items, admin) still show mock data.
+the database, and sign-in uses JWT authentication. The remaining pages (orders, sold items, admin) still show mock data.
 
 ## Running the project
 
@@ -26,6 +26,15 @@ npm run dev            # http://localhost:5000
 | `DB_NAME` | Database name (default `marketplace`) |
 | `PORT` | API port (default `5000`) |
 | `CLIENT_ORIGIN` | Frontend origin allowed by CORS (default `http://localhost:5173`) |
+| `JWT_SECRET` | **Required.** 32+ random characters used to sign tokens (the server refuses to start without it) |
+| `JWT_EXPIRES_IN` | Token lifetime (default `1h`) |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Only read by `npm run create-admin` |
+
+Create the first administrator (registration never creates admins; an existing email is promoted and its password reset):
+```bash
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='at-least-12-chars' npm run create-admin
+```
+Run the API tests (`npm test`, in `Backend/`): they use a throw-away `<DB_NAME>_test` database and drop it afterwards.
 
 ### 2. Frontend
 In a second terminal:
@@ -38,10 +47,11 @@ Set `VITE_API_URL` in `Frontend/.env` if the API is not on `http://localhost:500
 
 ## Exploring the app
 
-### Signing in (temporary)
-Sign in with the email of an account in the `users` collection. Passwords are **not checked yet**; real
-authentication (hashed passwords + tokens) is a later milestone. Accounts with `role: "admin"` open the
-administrator portal, everyone else opens the user/seller portal. Unknown emails are rejected.
+### Signing in
+Register at `/register`, then sign in with email and password. The API returns a JWT that the frontend sends as
+`Authorization: Bearer <token>`. Accounts with role `admin` open the administrator portal. Seed accounts that
+still hold placeholder password hashes cannot sign in until an admin sets a password
+(`PATCH /api/admin/users/:id` with `{ "password": "..." }`) or `create-admin` is run for that email.
 
 ### Suggested walkthrough
 1. **Browse parts** (`/browse`): search, filter and sort live listings from the database.
@@ -68,8 +78,14 @@ All responses are JSON. Errors use `{ "error": "message" }`, plus `details` (fie
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/meta` | Reference data: categories, conditions, statuses, currency, field limits |
-| POST | `/api/session` | Resolve an email to an account (temporary sign-in) |
-| GET | `/api/session` | Current account |
+| POST | `/api/auth/register` | Create a normal user (`name`, `email`, `password`, optional `accountType` buyer/seller) |
+| POST | `/api/auth/login` | `{ email, password }` -> `{ token, user }` |
+| GET / PATCH | `/api/auth/me` | Current account / change own `name` (nothing else) |
+| GET | `/api/session` | Current account (same as `/api/auth/me`) |
+| GET | `/api/admin/users`, `/api/admin/users/:id` | **Admin only.** View users |
+| PATCH / DELETE | `/api/admin/users/:id` | **Admin only.** Change `name`, `role`, `accountType`, `status`, `password`; delete |
+| GET | `/api/admin/listings?status=` | **Admin only.** All listings |
+| PATCH / DELETE | `/api/admin/listings/:id` | **Admin only.** Edit, moderate (`status`) or delete any listing |
 | GET | `/api/parts` | Active listings for Browse |
 | GET | `/api/parts/:id` | One active listing |
 | GET/POST/PATCH/DELETE | `/api/cart`, `/api/cart/items/:listingId` | Cart for the current browser |
@@ -79,9 +95,15 @@ All responses are JSON. Errors use `{ "error": "message" }`, plus `details` (fie
 | PATCH | `/api/seller/listings/:id` | Update fields; anything but `quantity` re-submits for review |
 | DELETE | `/api/seller/listings/:id` | Delete a listing and remove it from carts |
 
-Seller endpoints identify the caller with the `X-User-Id` header (set by the frontend after sign-in) and only
-ever touch that caller's listings; other sellers' listings return `404`. This header is a stand-in until
-token-based authentication replaces it in `middleware/currentUser.js`.
+Seller endpoints require a valid JWT (`401` otherwise). `PATCH`/`DELETE` on a listing owned by someone else
+return `403`; reading another seller's listing returns `404`. Non-admins get `403` on `/api/admin/*`.
+
+### Authorization
+- **Role** (`admin` | `user`) controls permissions; **account type** (`buyer` | `seller`) is separate. Older user
+  records that stored the account type in `role` are read correctly without a migration.
+- The token holds only the user id; role and status are loaded from MongoDB on every request, so promotions,
+  demotions and suspensions take effect immediately. Roles are changed only through `PATCH /api/admin/users/:id`.
+- Passwords are hashed with bcrypt and never returned. The cart endpoints still use their per-browser `X-User-Id` id.
 
 ### Input validation
 - Request bodies are read through a field whitelist (`validators/listing.js`); fields like `status` or
@@ -95,9 +117,11 @@ token-based authentication replaces it in `middleware/currentUser.js`.
 ```
 Backend/
   config/         db connection, reference data (categories, statuses, limits)
-  middleware/     currentUser (request identity)
+  middleware/     currentUser (JWT -> req.user), authorize (roles, listing ownership)
   repositories/   MongoDB data access (users, seller listings)
-  routes/         Express routers: meta, session, parts, cart, seller listings
+  routes/         Express routers: meta, auth, admin, session, parts, cart, seller listings
+  scripts/        create-admin
+  tests/          API integration tests
   validators/     request validation
   utils/          shared listing helpers for the public catalogue
   server.js       app setup, error handling, startup indexes
