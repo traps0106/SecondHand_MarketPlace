@@ -5,7 +5,9 @@ import { connectDB, getDB } from "./config/db.js";
 import cartRoutes from "./routes/cart.js";
 import metaRoutes from "./routes/meta.js";
 import partRoutes from "./routes/parts.js";
+import sellerListingRoutes from "./routes/sellerListings.js";
 import sessionRoutes from "./routes/session.js";
+import { ensureSellerListingIndexes } from "./repositories/sellerListings.js";
 
 dotenv.config();
 
@@ -22,6 +24,7 @@ app.use("/api/meta", metaRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/parts", partRoutes);
+app.use("/api/seller/listings", sellerListingRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
@@ -44,6 +47,7 @@ async function startServer() {
         await connectDB();
 
         await getDB().collection("carts").createIndex({ userId: 1 }, { unique: true });
+        await ensureSellerListingIndexes();
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
