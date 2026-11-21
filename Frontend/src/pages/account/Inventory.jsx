@@ -1,169 +1,148 @@
+import { useEffect, useState } from 'react';
+import { listMyListings, updateListingQuantity } from '../../api/seller';
+import useMeta from '../../hooks/useMeta';
 
-import React, { useState } from 'react';
+const isValidQuantity = (value, max) => /^\d+$/.test(value.trim()) && Number(value) <= max;
 
 export default function Inventory() {
-    const [inventory, setInventory] = useState([
-        { id: 'L-201', name: 'Toyota Corolla alternator', year: '2014-2018', savedStock: 3, newStock: '3', avail: 'Available', status: 'Active' },
-        { id: 'L-202', name: 'Honda Civic headlamp left', year: '2016-2020', savedStock: 2, newStock: '2', avail: 'Available', status: 'Active' },
-        { id: 'L-203', name: 'BMW E90 side mirror right', year: '2005-2011', savedStock: 1, newStock: '1', avail: 'Hidden in review', status: 'In review' },
-    ]);
-
+    const { meta, statusLabel } = useMeta();
+    const [rows, setRows] = useState(null); // [{ listing, draft }]
+    const [loadError, setLoadError] = useState('');
     const [feedback, setFeedback] = useState(null);
+    const [saving, setSaving] = useState(false);
 
-    const handleInputChange = (id, val) => {
-        setInventory(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, newStock: val } : item
-            )
-        );
+    useEffect(() => {
+        let cancelled = false;
+        listMyListings()
+            .then(({ items }) => {
+                if (!cancelled) setRows(items.map((listing) => ({ listing, draft: String(listing.quantity) })));
+            })
+            .catch((e) => { if (!cancelled) setLoadError(e.message); });
+        return () => { cancelled = true; };
+    }, []);
+
+    const availability = ({ status, quantity }) => {
+        if (status !== 'active') return `Hidden · ${statusLabel(status)}`;
+        return quantity > 0 ? 'Available' : 'Out of stock';
     };
 
-    const handleSave = () => {
-        let hasInvalid = false;
+    const setDraft = (id, draft) =>
+        setRows((list) => list.map((r) => (r.listing.id === id ? { ...r, draft } : r)));
 
-        inventory.forEach(item => {
-            const num = Number(item.newStock);
-
-            if (
-                item.newStock.trim() === '' ||
-                !Number.isInteger(num) ||
-                num < 0
-            ) {
-                hasInvalid = true;
-            }
-        });
-
-        if (hasInvalid) {
-            setFeedback({
-                type: 'error',
-                text: 'Enter a whole number of 0 or more. Changes were not saved.'
-            });
-        } else {
-            const updatedInventory = inventory.map(item => ({
-                ...item,
-                savedStock: Number(item.newStock)
-            }));
-
-            const changedItems = updatedInventory.filter((item, index) =>
-                item.savedStock !== inventory[index].savedStock
-            );
-
-            setInventory(updatedInventory);
-
-            setFeedback({
-                type: 'success',
-                text: changedItems.length > 0
-                    ? `Stock saved successfully. ${changedItems.map(item =>
-                        `${item.name}: ${item.savedStock} units`
-                    ).join(', ')} saved.`
-                    : 'No stock changes were made.'
-            });
+    const handleSave = async () => {
+        const maxQuantity = meta?.limits.maxQuantity ?? Infinity;
+        if (rows.some((r) => !isValidQuantity(r.draft, maxQuantity))) {
+            setFeedback({ type: 'error', text: 'Enter a whole number of 0 or more. Changes were not saved.' });
+            return;
         }
+
+        const changed = rows.filter((r) => Number(r.draft) !== r.listing.quantity);
+        if (!changed.length) {
+            setFeedback({ type: 'success', text: 'No stock changes were made.' });
+            return;
+        }
+
+        // Save rows independently so one failure does not block the others.
+        setSaving(true);
+        const results = await Promise.allSettled(
+            changed.map((r) => updateListingQuantity(r.listing.id, Number(r.draft))),
+        );
+        setSaving(false);
+
+        const saved = results.filter((r) => r.status === 'fulfilled').map((r) => r.value);
+        const failed = results.length - saved.length;
+        const byId = new Map(saved.map((l) => [l.id, l]));
+
+        setRows((list) => list.map((r) => {
+            const updated = byId.get(r.listing.id);
+            return updated ? { listing: updated, draft: String(updated.quantity) } : r;
+        }));
+
+        const summary = saved.map((l) => `${l.name}: ${l.quantity} units`).join(', ');
+        setFeedback(failed
+            ? { type: 'error', text: `${failed} change${failed > 1 ? 's' : ''} could not be saved.${summary ? ` Saved: ${summary}.` : ''}` }
+            : { type: 'success', text: `Stock saved successfully. ${summary}.` });
     };
 
     const handleCancel = () => {
-        setInventory(prev =>
-            prev.map(item => ({
-                ...item,
-                newStock: item.savedStock.toString()
-            }))
-        );
-
+        setRows((list) => list.map((r) => ({ ...r, draft: String(r.listing.quantity) })));
         setFeedback(null);
     };
 
     return (
         <div className="card">
             <h2 className="card-title">Inventory</h2>
-
             <p className="card-subtitle">
                 Manage stock quantities for your own listings. Enter whole numbers, zero or above.
+                Stock changes do not need re-approval.
             </p>
 
             {feedback && (
-                <div
-                    className={`inventory-feedback ${feedback.type}`}
-                    role="status"
-                    aria-live="polite"
-                >
+                <div className={`inventory-feedback ${feedback.type}`} role="status" aria-live="polite">
                     {feedback.text}
                 </div>
             )}
 
-            <table className="data-table inventory-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Part/vehicle</th>
-                        <th scope="col">Saved stock</th>
-                        <th scope="col">New stock</th>
-                        <th scope="col">Availability</th>
-                        <th scope="col">Status</th>
-                    </tr>
-                </thead>
+            {loadError ? (
+                <div className="banner banner-error" role="alert">⚠ {loadError}. Make sure the backend is running.</div>
+            ) : !rows ? (
+                <p>Loading inventory…</p>
+            ) : rows.length === 0 ? (
+                <p>You have no listings yet.</p>
+            ) : (
+                <>
+                    <table className="data-table inventory-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Part/vehicle</th>
+                                <th scope="col">Saved stock</th>
+                                <th scope="col">New stock</th>
+                                <th scope="col">Availability</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rows.map(({ listing, draft }) => (
+                                <tr key={listing.id}>
+                                    <td>
+                                        <strong>{listing.name}</strong>
+                                        <div className="inventory-meta">
+                                            {listing.make} {listing.model} · {listing.year}
+                                        </div>
+                                    </td>
+                                    <td>{listing.quantity}</td>
+                                    <td>
+                                        <label className="sr-only" htmlFor={`stock-${listing.id}`}>
+                                            New stock quantity for {listing.name}
+                                        </label>
+                                        <input
+                                            id={`stock-${listing.id}`}
+                                            type="number"
+                                            min="0"
+                                            max={meta?.limits.maxQuantity}
+                                            step="1"
+                                            className="form-input stock-input"
+                                            value={draft}
+                                            onChange={(e) => setDraft(listing.id, e.target.value)}
+                                        />
+                                    </td>
+                                    <td>{availability(listing)}</td>
+                                    <td><span className="status-badge">{statusLabel(listing.status)}</span></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
 
-                <tbody>
-                    {inventory.map((item) => (
-                        <tr key={item.id}>
-                            <td>
-                                <strong>{item.name}</strong>
-                                <div className="inventory-meta">
-                                    {item.year} · {item.id}
-                                </div>
-                            </td>
-
-                            <td>{item.savedStock}</td>
-
-                            <td>
-                                <label
-                                    className="sr-only"
-                                    htmlFor={`stock-${item.id}`}
-                                >
-                                    New stock quantity for {item.name}
-                                </label>
-
-                                <input
-                                    id={`stock-${item.id}`}
-                                    name={`stock-${item.id}`}
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    className="form-input stock-input"
-                                    value={item.newStock}
-                                    onChange={(e) =>
-                                        handleInputChange(item.id, e.target.value)
-                                    }
-                                />
-                            </td>
-
-                            <td>{item.avail}</td>
-
-                            <td>
-                                <span className="status-badge">
-                                    {item.status}
-                                </span>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <div className="inventory-actions">
-                <button
-                    onClick={handleSave}
-                    className="btn-primary"
-                    type="button"
-                >
-                    Save changes
-                </button>
-
-                <button
-                    onClick={handleCancel}
-                    className="btn-secondary"
-                    type="button"
-                >
-                    Cancel
-                </button>
-            </div>
+                    <div className="inventory-actions">
+                        <button onClick={handleSave} className="btn-primary" type="button" disabled={saving}>
+                            {saving ? 'Saving…' : 'Save changes'}
+                        </button>
+                        <button onClick={handleCancel} className="btn-secondary" type="button" disabled={saving}>
+                            Cancel
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

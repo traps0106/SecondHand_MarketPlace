@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { formatBHD, formatDate, yearRange } from '../../data/parts';
+import { formatBHD, formatDate, yearRange } from '../../utils/format';
 import { getPart } from '../../api/parts';
 import { isSignedIn } from '../../auth';
 import { addToCart } from '../../api/cart';

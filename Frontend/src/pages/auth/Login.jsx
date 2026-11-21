@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signIn } from '../../auth';
+import { createSession } from '../../api/session';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -10,18 +11,27 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const handleSubmit = (e) => {
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email.trim() || !password) {
             setErrorMessage('Please fill in all mandatory fields.');
             return;
         }
 
-        // Navigate to account portal on successful sign in
-        // Prototype rule: emails starting with "admin" sign in as an administrator.
-        const isAdminUser = email.trim().toLowerCase().startsWith('admin');
-        signIn(isAdminUser ? 'admin' : 'user');
-        navigate(isAdminUser ? '/admin/users' : '/account/overview');
+        // The account and its role come from the database. Passwords are not
+        // verified yet; that arrives with the authentication milestone.
+        setSubmitting(true);
+        try {
+            const user = await createSession(email.trim());
+            signIn(user);
+            navigate(user.role === 'admin' ? '/admin/users' : '/account/overview');
+        } catch (err) {
+            setErrorMessage(err.message);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -119,8 +129,8 @@ export default function Login() {
                             </Link>
                         </div>
 
-                        <button type="submit" className="btn-primary" style={{ width: '100%' }}>
-                            Let's Role
+                        <button type="submit" className="btn-primary" style={{ width: '100%' }} disabled={submitting}>
+                            {submitting ? 'Signing in…' : 'Sign in'}
                         </button>
                     </form>
                 </div>

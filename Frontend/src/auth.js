@@ -1,20 +1,30 @@
-// Placeholder session helper for the front-end skeleton (no real auth yet).
-const KEY = 'pm-signed-in';
+// Client-side session: the account returned by the API at sign-in.
+// TEMPORARY until token-based auth exists; callers only use the helpers below,
+// so switching to a JWT means changing this file and api/session.js.
+const KEY = 'pm-session';
 
-export function getRole() {
+export function getCurrentUser() {
     try {
-        return sessionStorage.getItem(KEY); // 'user' | 'admin' | null
+        const raw = sessionStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : null; // { id, name, email, role }
     } catch {
         return null;
     }
 }
 
-export const isSignedIn = () => getRole() !== null;
+export const getRole = () => getCurrentUser()?.role ?? null;
+export const isSignedIn = () => getCurrentUser() !== null;
 export const isAdmin = () => getRole() === 'admin';
 
-export function signIn(role = 'user') {
+// Headers that identify the caller to the API.
+export function authHeaders() {
+    const user = getCurrentUser();
+    return user ? { 'X-User-Id': user.id } : {};
+}
+
+export function signIn(user) {
     try {
-        sessionStorage.setItem(KEY, role);
+        sessionStorage.setItem(KEY, JSON.stringify(user));
     } catch {
         /* storage unavailable */
     }

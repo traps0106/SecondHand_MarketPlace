@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { formatBHD, yearRange } from '../../data/parts';
+import { formatBHD, yearRange } from '../../utils/format';
 
 export default function OrderConfirmation() {
     const { state } = useLocation();

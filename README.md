@@ -1,76 +1,117 @@
 # SecondHand MarketPlace (Parts Market)
 
-A marketplace for secondhand car parts. This repository currently contains a **front-end skeleton**
-(React + Vite) built from the Figma designs. It uses hardcoded mock data, so no backend or database is needed to run it.
+A marketplace for secondhand car parts: a React + Vite frontend and a Node.js (Express) API backed by MongoDB Atlas.
 
-## Running the front-end skeleton
+Browse, part details, cart and the seller pages (My listings, Create/Edit listing, Inventory) read and write
+the database. The remaining pages (orders, sold items, admin) still show mock data.
+
+## Running the project
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) **v20.19 or newer** (v22 LTS recommended). Check with `node -v`.
 - npm (installed with Node.js).
+- Access to the team's MongoDB Atlas cluster.
 
-### Steps
-1. Open a terminal in the project folder and go to the front-end folder:
-   ```bash
-   cd Frontend
-   ```
-2. Install dependencies (first time only):
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-4. Open the URL printed in the terminal (normally **http://localhost:5173**) in your browser.
+### 1. Backend (API)
+```bash
+cd Backend
+npm install
+cp .env.example .env   # then fill in MONGO_URI (never commit .env)
+npm run dev            # http://localhost:5000
+```
 
-To stop the server, press `Ctrl + C` in the terminal.
-
-Optional: `npm run build` creates a production build, and `npm run preview` serves it.
-
-## Exploring the prototype
-
-The app opens on **Browse Parts** page. Every page is reachable by clicking links and buttons. There is no real
-login, so use the rules below.
-
-### Signing in (prototype rules)
-Any email and password are accepted (the email must look valid and the password must not be empty).
-
-| Sign in with | You get |
+| Variable | Purpose |
 |---|---|
-| Any email, e.g. `user@example.com` | Seller / buyer account (`/account/...`) |
-| An email starting with `admin`, e.g. `admin@example.com` | Administrator portal (`/admin/...`) |
+| `MONGO_URI` | Atlas connection string |
+| `DB_NAME` | Database name (default `marketplace`) |
+| `PORT` | API port (default `5000`) |
+| `CLIENT_ORIGIN` | Frontend origin allowed by CORS (default `http://localhost:5173`) |
+
+### 2. Frontend
+In a second terminal:
+```bash
+cd Frontend
+npm install
+npm run dev            # http://localhost:5173
+```
+Set `VITE_API_URL` in `Frontend/.env` if the API is not on `http://localhost:5000` (see `Frontend/.env.example`).
+
+## Exploring the app
+
+### Signing in (temporary)
+Sign in with the email of an account in the `users` collection. Passwords are **not checked yet**; real
+authentication (hashed passwords + tokens) is a later milestone. Accounts with `role: "admin"` open the
+administrator portal, everyone else opens the user/seller portal. Unknown emails are rejected.
 
 ### Suggested walkthrough
-1. **Browse parts** (`/browse`): search, filter (category, make, year, condition, stock, price) and sort. Filters apply as you change them.
-2. Click **View details** on a part, then **Log in to order**.
-3. **Create account** (`/register`): submit with invalid fields to see the validation errors; valid details go to the Sign in page with a success banner.
-4. **Forgot password?** on the Sign in page: Send reset link, Check your inbox, then "Simulate clicking email link" to reach the new password form.
-5. Sign in as a normal user, return to a part and **Place order** to see the order confirmation.
-6. **My account**: Overview, My listings (Create / Edit listing), Inventory, Sold items, Order history, Personal details, Security (change or delete account).
-7. Log out, sign in with an `admin...` email: User management (Overview), Listing moderation, Audit logs, Security.
-8. As a normal user, open an admin URL such as `/admin/users` to see **Access denied**. Any unknown URL shows **Page not found**.
+1. **Browse parts** (`/browse`): search, filter and sort live listings from the database.
+2. Open a part, add it to the **cart** (`/cart`) and change quantities.
+3. Sign in as a seller and open **My listings**: search, filter by moderation status, delete with confirmation.
+4. **Create listing**: submit empty to see validation, then submit a valid part. New listings start
+   **In review** and only appear in Browse once approved (`status: "active"`).
+5. **Edit** a listing: changing details sends it back to review; changing only the stock does not.
+6. **Inventory**: update stock for several listings at once.
+7. As a normal user, open an admin URL such as `/admin/users` to see **Access denied**.
 
 ### Page map
 | Area | Routes |
 |---|---|
-| Public | `/browse`, `/parts/:id`, `/order-confirmation` (needs sign-in), `/access-denied` |
+| Public | `/browse`, `/parts/:id`, `/cart`, `/order-confirmation` (needs sign-in), `/access-denied` |
 | Auth | `/login`, `/register`, `/forgot-password` |
 | Account | `/account/overview`, `/listings`, `/listings/new`, `/listings/:id/edit`, `/inventory`, `/sold-items`, `/order-history`, `/personal-details`, `/security` |
 | Admin | `/admin/users`, `/admin/moderation`, `/admin/audit-logs`, `/admin/security` |
 
+## API
+
+All responses are JSON. Errors use `{ "error": "message" }`, plus `details` (field -> message) for validation errors.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/meta` | Reference data: categories, conditions, statuses, currency, field limits |
+| POST | `/api/session` | Resolve an email to an account (temporary sign-in) |
+| GET | `/api/session` | Current account |
+| GET | `/api/parts` | Active listings for Browse |
+| GET | `/api/parts/:id` | One active listing |
+| GET/POST/PATCH/DELETE | `/api/cart`, `/api/cart/items/:listingId` | Cart for the current browser |
+| GET | `/api/seller/listings?search=&status=` | The caller's listings |
+| GET | `/api/seller/listings/:id` | One of the caller's listings |
+| POST | `/api/seller/listings` | Create a listing (starts `pending`) |
+| PATCH | `/api/seller/listings/:id` | Update fields; anything but `quantity` re-submits for review |
+| DELETE | `/api/seller/listings/:id` | Delete a listing and remove it from carts |
+
+Seller endpoints identify the caller with the `X-User-Id` header (set by the frontend after sign-in) and only
+ever touch that caller's listings; other sellers' listings return `404`. This header is a stand-in until
+token-based authentication replaces it in `middleware/currentUser.js`.
+
+### Input validation
+- Request bodies are read through a field whitelist (`validators/listing.js`); fields like `status` or
+  `sellerId` sent by a client are ignored.
+- Every value must be a primitive of the expected type, so query operators such as `{ "$gt": "" }` are rejected
+  (NoSQL injection).
+- Prices are validated as strings with up to 3 decimals and stored as `Decimal128`.
+- Search text is regex-escaped and length-limited.
+
 ## Project structure
 ```
+Backend/
+  config/         db connection, reference data (categories, statuses, limits)
+  middleware/     currentUser (request identity)
+  repositories/   MongoDB data access (users, seller listings)
+  routes/         Express routers: meta, session, parts, cart, seller listings
+  validators/     request validation
+  utils/          shared listing helpers for the public catalogue
+  server.js       app setup, error handling, startup indexes
 Frontend/
   src/
+    api/          API client and one module per resource (pages never call fetch directly)
+    hooks/        useMeta (reference data)
     components/   shared layouts (DashboardLayout, PublicLayout)
+    data/         sample parts data (kept for reference; pages load data from the API)
     pages/        auth/, account/, admin/, public/
-    data/         hardcoded mock parts
-    auth.js       fake sign-in helper (sessionStorage)
-    index.css     global styles
-Backend/          placeholder, not used by the skeleton
+    utils/        formatting helpers
+    auth.js       client-side session helper
 ```
 
 ## Notes
-- All data is static mock data; forms do not save anything.
 - Orders are simulated and no payment is taken.
+- Listing photos are not uploaded yet.
