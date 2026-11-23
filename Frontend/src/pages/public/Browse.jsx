@@ -10,7 +10,6 @@ const DEFAULT_FILTERS = {
     make: '',
     year: '',
     conditions: [],
-    inStock: true,
     min: '',
     max: '40',
 };
@@ -19,7 +18,6 @@ const EMPTY_FILTERS = {
     ...DEFAULT_FILTERS,
     categories: [],
     conditions: [],
-    inStock: false,
     max: '',
 };
 
@@ -41,7 +39,6 @@ function applyFilters(parts, f) {
         if (f.make && p.make !== f.make) return false;
         if (f.year && !(p.yearFrom <= Number(f.year) && Number(f.year) <= p.yearTo)) return false;
         if (f.conditions.length && !f.conditions.includes(p.condition)) return false;
-        if (f.inStock && p.stock < 1) return false;
         if (min !== null && p.price < min) return false;
         if (max !== null && p.price > max) return false;
         return true;
@@ -79,7 +76,6 @@ export default function Browse() {
         ...(applied.make ? [{ label: applied.make, patch: { make: '' } }] : []),
         ...(applied.year ? [{ label: `Year ${applied.year}`, patch: { year: '' } }] : []),
         ...applied.conditions.map((c) => ({ label: c, patch: { conditions: applied.conditions.filter((v) => v !== c) } })),
-        ...(applied.inStock ? [{ label: 'In stock only', patch: { inStock: false } }] : []),
         ...(applied.min !== '' ? [{ label: `Min BHD ${applied.min}`, patch: { min: '' } }] : []),
         ...(applied.max !== '' ? [{ label: `Max BHD ${applied.max}`, patch: { max: '' } }] : []),
     ];
@@ -87,7 +83,7 @@ export default function Browse() {
     return (
         <div className="browse-layout">
             <form className="filters-panel" aria-label="Filters" onSubmit={submit}>
-                <h2 className="sidebar-title">Filters</h2>
+                <h2 className="sidebar-title">Narrow it down</h2>
 
                 <fieldset className="filter-fieldset">
                     <legend>Category</legend>
@@ -134,14 +130,6 @@ export default function Browse() {
                 </fieldset>
 
                 <fieldset className="filter-fieldset">
-                    <legend>Availability</legend>
-                    <label className="check-row">
-                        <input type="checkbox" checked={draft.inStock} onChange={(e) => update({ inStock: e.target.checked })} />
-                        In stock only
-                    </label>
-                </fieldset>
-
-                <fieldset className="filter-fieldset">
                     <legend>Price (BHD)</legend>
                     <div className="price-inputs">
                         <div>
@@ -162,10 +150,13 @@ export default function Browse() {
             </form>
 
             <section className="browse-results" aria-labelledby="browse-title">
-                <h2 id="browse-title">Browse parts</h2>
-                <p className="page-heading">
-                    Search secondhand car parts listed by sellers. Filter by category, vehicle, condition and price.
-                </p>
+                <div className="hero">
+                    <p className="hero-scribble">pre-loved parts, real people</p>
+                    <h2 id="browse-title">Give a good part a second life.</h2>
+                    <p className="hero-sub">
+                        Honest secondhand car parts from local sellers. Somebody&apos;s spare could be exactly what your car needs.
+                    </p>
+                </div>
 
                 <form className="filter-toolbar" role="search" aria-label="Search parts" onSubmit={submit}>
                     <div className="filter-search">
@@ -210,12 +201,12 @@ export default function Browse() {
                 {loadError && <div className="banner" role="alert">{loadError}. Make sure the backend is running.</div>}
 
                 <h3 className="results-count" role="status" aria-live="polite">
-                    {parts === null ? (loadError ? '' : 'Loading parts…') : `${results.length} ${results.length === 1 ? 'part' : 'parts'} found`}
+                    {parts === null ? (loadError ? '' : 'Rummaging through the shelves…') : `${results.length} ${results.length === 1 ? 'find' : 'finds'} for you`}
                 </h3>
 
                 {parts === null ? null : results.length === 0 ? (
                     <div className="card empty-state">
-                        <h4 className="delete-title">No parts match your search</h4>
+                        <h4 className="delete-title">Nothing on the shelf matches that</h4>
                         <p className="delete-description">Try fewer filters, a different part name or a wider price range.</p>
                         <button type="button" className="btn-secondary" onClick={clearAll}>Clear all filters</button>
                     </div>
@@ -223,7 +214,7 @@ export default function Browse() {
                     <ul className="part-grid">
                         {results.map((p) => (
                             <li key={p.id} className="part-card">
-                                <div className="photo-placeholder" aria-hidden="true">Part photo</div>
+                                <div className="photo-placeholder" aria-hidden="true"><span>⚙</span></div>
                                 <div className="part-card-body">
                                     <h4 className="part-card-title">{p.name}</h4>
                                     <p className="listing-meta">{yearRange(p)} · {p.make} {p.model} · {p.partNumber ?? p.id}</p>
@@ -231,9 +222,9 @@ export default function Browse() {
                                         <span className="tag">{p.condition}</span> {p.stock > 0 ? 'In stock' : 'Out of stock'}
                                     </p>
                                     <p className="price-card">{formatBHD(p.price)}</p>
-                                    <p className="listing-meta">Seller: {p.seller}</p>
+                                    <p className="listing-meta seller-line">sold by {p.seller}</p>
                                     <Link to={`/parts/${p.id}`} className="btn-secondary btn-link btn-block" aria-label={`View details for ${p.name}`}>
-                                        View details
+                                        Take a look
                                     </Link>
                                 </div>
                             </li>

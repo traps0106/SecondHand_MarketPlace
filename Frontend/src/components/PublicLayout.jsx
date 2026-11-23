@@ -21,7 +21,7 @@ export default function PublicLayout({ requireAuth = false }) {
             <a href="#main-content" className="skip-link">Skip to main content</a>
             <header className="app-header public-header">
                 <h1>
-                    <Link to="/browse" className="brand-link">Parts Market</Link>
+                    <Link to="/browse" className="brand-link">Parts Market<span className="brand-tag">pre-loved car parts</span></Link>
                 </h1>
                 <nav aria-label="Main" className="public-nav">
                     {signedIn && <span className="public-nav-user">Signed in</span>}

@@ -12,11 +12,11 @@
   --orange-hover: #f08340;
   --black: #111111;
   --grey: #515151;
-  --smoke: #e5e5e5;
+  --smoke: #f3ead8;
   --white: #ffffff;
 
   /* derived tones */
-  --border: #cdd1cd;
+  --border: #d9ccb0;
   --tint: #e6ede7;          /* light swamp wash: selected rows, chips, hovers */
   --tint-strong: #d3dfd5;
   --forest-line: #24402b;   /* borders/hover on forest surfaces */
@@ -39,7 +39,10 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body, button, input, select, textarea {
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
 }
 
 body {
@@ -669,3 +672,87 @@ span.stepper-input { display: inline-flex; align-items: center; justify-content:
 }
 
 button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ==========================================================================
+   Soul layer: warm, handmade flea-market feel
+   ========================================================================== */
+body {
+  background-image: radial-gradient(rgba(74, 100, 77, 0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+h2, .card-title, .part-card-title, .order-summary-title { font-family: "Fraunces", Georgia, serif; }
+
+.app-header { border-bottom: 4px dashed var(--orange); }
+.app-header h1 { font-family: "Fraunces", Georgia, serif; font-size: 1.5rem; font-weight: 800; }
+.brand-link { display: inline-flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.brand-tag { font-family: "Caveat", cursive; font-size: 1.25rem; font-weight: 700; color: var(--orange); transform: rotate(-3deg); display: inline-block; }
+
+.card, .filters-panel { border-radius: 14px; border: 1.5px solid var(--border); background: #fffdf7; }
+.btn-primary, .btn-secondary { border-radius: 999px; }
+.btn-primary { box-shadow: 0 2px 0 #a84d12; }
+.btn-primary:active { transform: translateY(2px); box-shadow: none; }
+
+.hero {
+  background: var(--forest);
+  color: var(--white);
+  border-radius: 18px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  border: 2px dashed var(--orange);
+  outline: 4px solid var(--forest);
+  outline-offset: -1px;
+}
+.hero h2 { color: var(--white); font-size: 2rem; line-height: 1.15; margin: 0.15rem 0 0.6rem; }
+.hero-scribble { font-family: "Caveat", cursive; font-size: 1.5rem; color: var(--orange); transform: rotate(-2deg); display: inline-block; }
+.hero-sub { max-width: 34rem; color: #dbe6dc; }
+
+.filters-panel .sidebar-title { font-family: "Caveat", cursive; font-size: 1.6rem; text-transform: none; letter-spacing: 0; }
+.filter-fieldset legend { font-family: "Fraunces", Georgia, serif; }
+
+.part-grid { gap: 1.75rem; padding: 0.5rem 0.25rem; }
+.part-card {
+  background: #fffdf7;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.6rem 0;
+  box-shadow: 2px 4px 10px rgba(60, 40, 10, 0.14);
+  transform: rotate(-0.7deg);
+}
+.part-card:nth-child(even) { transform: rotate(0.8deg); }
+.part-card:nth-child(3n) { transform: rotate(-0.3deg); }
+.part-card:hover { transform: rotate(0) translateY(-4px); box-shadow: 4px 10px 20px rgba(60, 40, 10, 0.22); }
+.part-card .photo-placeholder {
+  position: relative;
+  border-radius: 3px;
+  background: repeating-linear-gradient(45deg, var(--tint), var(--tint) 10px, var(--tint-strong) 10px, var(--tint-strong) 20px);
+  font-size: 3rem;
+  color: var(--swamp);
+}
+.part-card .photo-placeholder::before {
+  content: "";
+  position: absolute;
+  top: -10px; left: 50%;
+  width: 70px; height: 20px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(222, 109, 32, 0.45);
+}
+.part-card-body { padding: 0.8rem 0.4rem 1rem; }
+.price-card {
+  display: inline-block;
+  background: var(--orange);
+  color: var(--black);
+  padding: 0.05rem 0.7rem 0.05rem 0.9rem;
+  clip-path: polygon(0.5rem 0, 100% 0, 100% 100%, 0.5rem 100%, 0 50%);
+  font-family: "Fraunces", Georgia, serif;
+  margin: 0.4rem 0;
+}
+.seller-line { font-family: "Caveat", cursive; font-size: 1.1rem; color: var(--swamp); margin-bottom: 0.5rem; }
+.tag, .chip, .empty-state { border-style: dashed; }
+.results-count { font-family: "Caveat", cursive; font-size: 1.6rem; color: var(--swamp); }
+
+.photo-large { border-radius: 6px; }
+.price-large { font-family: "Fraunces", Georgia, serif; color: var(--forest); }
+
+@media (prefers-reduced-motion: reduce) {
+  .part-card, .part-card:hover { transform: none; transition: none; }
+}
